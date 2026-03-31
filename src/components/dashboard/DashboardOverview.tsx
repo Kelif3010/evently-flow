@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 
 const stats = [
   { label: "Gäste gesamt", value: "124", icon: Users, change: "+8 diese Woche", color: "text-primary" },
-  { label: "Zusagen", value: "87", icon: CheckCircle, change: "70%", color: "text-green-600" },
+  { label: "Zusagen", value: "87", icon: CheckCircle, change: "70%", color: "text-primary" },
   { label: "Absagen", value: "12", icon: XCircle, change: "10%", color: "text-accent" },
   { label: "Ausstehend", value: "25", icon: Clock, change: "20%", color: "text-gold" },
 ];
