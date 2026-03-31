@@ -92,8 +92,8 @@ const GuestPortalDemo = () => {
 
           {submitted ? (
             <div className="mt-6 text-center py-8">
-              <div className="w-16 h-16 mx-auto rounded-full bg-green-100 flex items-center justify-center mb-4">
-                <Check size={32} className="text-green-600" />
+              <div className="w-16 h-16 mx-auto rounded-full bg-champagne flex items-center justify-center mb-4">
+                <Check size={32} className="text-primary" />
               </div>
               <h3 className="font-heading text-xl font-bold text-foreground">Vielen Dank!</h3>
               <p className="mt-2 text-muted-foreground font-body">
