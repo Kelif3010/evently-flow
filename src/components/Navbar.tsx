@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -33,12 +34,16 @@ const Navbar = () => {
         </div>
 
         <div className="hidden md:flex items-center gap-3">
-          <Button variant="ghost" size="sm" className="font-body">
-            Login
-          </Button>
-          <Button size="sm" className="font-body bg-primary text-primary-foreground hover:bg-primary/90">
-            Kostenlos starten
-          </Button>
+          <Link to="/demo/dashboard">
+            <Button variant="ghost" size="sm" className="font-body">
+              Login
+            </Button>
+          </Link>
+          <Link to="/demo/dashboard">
+            <Button size="sm" className="font-body bg-primary text-primary-foreground hover:bg-primary/90">
+              Kostenlos starten
+            </Button>
+          </Link>
         </div>
 
         {/* Mobile toggle */}
