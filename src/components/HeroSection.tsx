@@ -47,12 +47,16 @@ const HeroSection = () => (
           transition={{ duration: 0.6, delay: 0.3 }}
           className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4"
         >
-          <Button size="lg" className="font-body text-base px-8 bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20">
-            Kostenlos starten <ArrowRight size={18} className="ml-2" />
-          </Button>
-          <Button size="lg" variant="outline" className="font-body text-base px-8 border-border hover:bg-secondary">
-            <Play size={18} className="mr-2" /> Demo ansehen
-          </Button>
+          <Link to="/demo/dashboard">
+            <Button size="lg" className="font-body text-base px-8 bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20">
+              Kostenlos starten <ArrowRight size={18} className="ml-2" />
+            </Button>
+          </Link>
+          <Link to="/demo/guest-portal">
+            <Button size="lg" variant="outline" className="font-body text-base px-8 border-border hover:bg-secondary">
+              <Play size={18} className="mr-2" /> Demo ansehen
+            </Button>
+          </Link>
         </motion.div>
 
         <motion.p
