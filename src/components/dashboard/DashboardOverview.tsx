@@ -77,7 +77,7 @@ const DashboardOverview = () => (
                 </div>
               </div>
               <span className={`text-xs font-body font-medium px-2.5 py-1 rounded-full ${
-                g.status === "Zugesagt" ? "bg-green-100 text-green-700" :
+                g.status === "Zugesagt" ? "bg-champagne text-primary" :
                 g.status === "Abgesagt" ? "bg-rose-light text-accent" :
                 "bg-gold-light text-champagne-foreground"
               }`}>
