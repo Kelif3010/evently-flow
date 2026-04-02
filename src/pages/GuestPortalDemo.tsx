@@ -5,7 +5,7 @@ import {
   CalendarClock, MapPin, Heart, Utensils, Hotel,
   Clock, ChevronDown, ChevronUp, Info, Users,
   Music, Camera, Gift, Car, Train, Shirt, Sparkles, ArrowLeft,
-  ExternalLink, ShoppingCart, MessageCircle, Countdown,
+  ExternalLink, ShoppingCart, MessageCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
