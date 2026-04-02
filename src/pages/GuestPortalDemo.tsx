@@ -73,7 +73,7 @@ const faqs = [
   { q: "Bis wann sollte ich mich zurückmelden?", a: "Bitte gebt eure Rückmeldung bis zum 1. Juni 2026 über das RSVP-Formular." },
   { q: "Gibt es einen Shuttle-Service?", a: "Ja! Vom Bahnhof Klais fahren Shuttles zur Location (alle 30 Min ab 12:30)." },
   { q: "Darf ich Fotos machen?", a: "Ja! Wir haben auch eine Foto-Box. Für die Trauung bitten wir euch, die Handys in der Tasche zu lassen – unser Fotograf übernimmt." },
-  { q: "Gibt es Geschenkwünsche?", a: "Schaut euch unsere Wunschliste an! Ihr findet sie im Tab „Wunschliste" oben." },
+  { q: "Gibt es Geschenkwünsche?", a: "Schaut euch unsere Wunschliste an! Ihr findet sie im Tab 'Wunschliste' oben." },
 ];
 
 const importantNotes = [
