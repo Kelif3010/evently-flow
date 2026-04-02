@@ -47,7 +47,7 @@ const HeroSection = () => (
           transition={{ duration: 0.6, delay: 0.3 }}
           className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4"
         >
-          <Link to="/demo/dashboard">
+          <Link to="/demo/onboarding">
             <Button size="lg" className="font-body text-base px-8 bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20">
               Kostenlos starten <ArrowRight size={18} className="ml-2" />
             </Button>

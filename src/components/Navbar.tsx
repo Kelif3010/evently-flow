@@ -39,7 +39,7 @@ const Navbar = () => {
               Login
             </Button>
           </Link>
-          <Link to="/demo/dashboard">
+          <Link to="/demo/onboarding">
             <Button size="sm" className="font-body bg-primary text-primary-foreground hover:bg-primary/90">
               Kostenlos starten
             </Button>

@@ -5,6 +5,7 @@ import {
   CalendarClock, MapPin, Heart, Utensils, Hotel,
   Clock, ChevronDown, ChevronUp, Info, Users,
   Music, Camera, Gift, Car, Train, Shirt, Sparkles, ArrowLeft,
+  ExternalLink, ShoppingCart, MessageCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -48,6 +49,23 @@ const hotels = [
   { name: "Hotel Bergzeit", price: "ab €120/Nacht", code: "EVORIA26", distance: "10 Min Fahrt", features: ["Halbpension mögl.", "Pool"] },
 ];
 
+const wishlistItems = [
+  { id: 1, name: "KitchenAid Artisan Küchenmaschine", price: "€599", image: "🍳", url: "#", reserved: false, category: "Küche" },
+  { id: 2, name: "Dyson V15 Akkusauger", price: "€649", image: "🧹", url: "#", reserved: true, reservedBy: "Anna H.", category: "Haushalt" },
+  { id: 3, name: "Samsonite Koffer-Set (2-teilig)", price: "€349", image: "🧳", url: "#", reserved: false, category: "Flitterwochen" },
+  { id: 4, name: "Nespresso Vertuo Kaffeemaschine", price: "€199", image: "☕", url: "#", reserved: false, category: "Küche" },
+  { id: 5, name: "Le Creuset Bräter 26cm", price: "€299", image: "🍲", url: "#", reserved: true, reservedBy: "Paul H.", category: "Küche" },
+  { id: 6, name: "Flitterwochen-Beitrag", price: "ab €50", image: "✈️", url: "#", reserved: false, category: "Flitterwochen" },
+  { id: 7, name: "Bang & Olufsen Beoplay A9", price: "€2.799", image: "🔊", url: "#", reserved: false, category: "Wohnen" },
+  { id: 8, name: "Rimowa Cabin Trolley", price: "€590", image: "💼", url: "#", reserved: false, category: "Flitterwochen" },
+];
+
+const guestbookEntries = [
+  { name: "Anna & Paul", message: "Wir freuen uns so für euch! Das wird der schönste Tag! ❤️", date: "12. März 2026" },
+  { name: "Lena S.", message: "Ihr seid das tollste Paar – ich kann es kaum erwarten! 🥳", date: "8. März 2026" },
+  { name: "Thomas M.", message: "Endlich! Herzlichen Glückwunsch euch beiden! 🍾", date: "1. März 2026" },
+];
+
 const faqs = [
   { q: "Gibt es einen Dresscode?", a: "Wir freuen uns über elegante Garderobe in gedeckten, warmen Farben. Bitte keine reinen weißen Outfits." },
   { q: "Können Kinder mitkommen?", a: "Wir feiern diesen Tag gerne mit euch als Paar. Für Kinderbetreuung können wir euch einen lokalen Service empfehlen." },
@@ -55,28 +73,58 @@ const faqs = [
   { q: "Bis wann sollte ich mich zurückmelden?", a: "Bitte gebt eure Rückmeldung bis zum 1. Juni 2026 über das RSVP-Formular." },
   { q: "Gibt es einen Shuttle-Service?", a: "Ja! Vom Bahnhof Klais fahren Shuttles zur Location (alle 30 Min ab 12:30)." },
   { q: "Darf ich Fotos machen?", a: "Ja! Wir haben auch eine Foto-Box. Für die Trauung bitten wir euch, die Handys in der Tasche zu lassen – unser Fotograf übernimmt." },
-  { q: "Gibt es Geschenkwünsche?", a: "Eure Anwesenheit ist das größte Geschenk! Wenn ihr uns etwas schenken möchtet, freuen wir uns über einen Beitrag zu unserer Flitterwochen-Kasse." },
+  { q: "Gibt es Geschenkwünsche?", a: "Schaut euch unsere Wunschliste an! Ihr findet sie im Tab 'Wunschliste' oben." },
 ];
 
 const importantNotes = [
   { icon: Shirt, title: "Dresscode", desc: "Elegante Abendgarderobe in warmen, gedeckten Farben. Kein reines Weiß bitte." },
   { icon: Camera, title: "Unplugged Ceremony", desc: "Während der Trauung bitte keine Handyfotos – genießt den Moment. 📵" },
-  { icon: Gift, title: "Geschenke", desc: "Statt Geschenken freuen wir uns über einen Beitrag zur Flitterwochen-Kasse." },
+  { icon: Gift, title: "Wunschliste", desc: "Schaut euch unsere Wunschliste an – oder schenkt Flitterwochen-Guthaben." },
   { icon: Music, title: "Musikwünsche", desc: "Eure Wünsche aus dem RSVP-Formular sind auf der DJ-Playlist! 🎵" },
 ];
 
 const GuestPortalDemo = () => {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<string>("schedule");
+  const [reservedItems, setReservedItems] = useState<number[]>(
+    wishlistItems.filter(i => i.reserved).map(i => i.id)
+  );
+  const [guestbookMsg, setGuestbookMsg] = useState("");
+  const [localEntries, setLocalEntries] = useState(guestbookEntries);
+  const [wishlistFilter, setWishlistFilter] = useState("Alle");
 
   const tabs = [
     { id: "schedule", label: "Tagesablauf", icon: Clock },
     { id: "seating", label: "Dein Tisch", icon: Users },
     { id: "menu", label: "Menü", icon: Utensils },
+    { id: "wishlist", label: "Wunschliste", icon: Gift },
     { id: "travel", label: "Anreise", icon: MapPin },
     { id: "hotels", label: "Hotels", icon: Hotel },
+    { id: "guestbook", label: "Gästebuch", icon: MessageCircle },
     { id: "faq", label: "FAQ", icon: Info },
   ];
+
+  // Countdown
+  const weddingDate = new Date("2026-08-15T14:00:00");
+  const now = new Date();
+  const diffMs = weddingDate.getTime() - now.getTime();
+  const daysLeft = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
+
+  const handleReserve = (id: number) => {
+    setReservedItems(prev => prev.includes(id) ? prev : [...prev, id]);
+  };
+
+  const handleGuestbookSubmit = () => {
+    if (!guestbookMsg.trim()) return;
+    setLocalEntries([
+      { name: "Sophie W.", message: guestbookMsg, date: "Gerade eben" },
+      ...localEntries,
+    ]);
+    setGuestbookMsg("");
+  };
+
+  const wishlistCategories = ["Alle", ...Array.from(new Set(wishlistItems.map(i => i.category)))];
+  const filteredWishlist = wishlistFilter === "Alle" ? wishlistItems : wishlistItems.filter(i => i.category === wishlistFilter);
 
   return (
     <div className="min-h-screen bg-background">
@@ -93,7 +141,7 @@ const GuestPortalDemo = () => {
         </div>
       </header>
 
-      {/* Hero */}
+      {/* Hero with Countdown */}
       <section className="relative py-12 md:py-20 text-center overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-champagne/50 via-background to-background pointer-events-none" />
         <div className="relative container mx-auto px-4">
@@ -101,13 +149,28 @@ const GuestPortalDemo = () => {
             <Heart size={28} className="mx-auto text-accent mb-3" />
             <h1 className="font-heading text-3xl md:text-5xl font-bold text-foreground">Willkommen, Sophie!</h1>
             <p className="mt-3 text-muted-foreground font-body max-w-lg mx-auto">
-              Wir freuen uns, euch bei unserer Hochzeit begrüßen zu dürfen. Hier findet ihr alle wichtigen Informationen.
+              Wir freuen uns, euch bei unserer Hochzeit begrüßen zu dürfen.
             </p>
             <div className="mt-5 flex flex-col sm:flex-row items-center justify-center gap-3 text-sm font-body text-foreground">
               <span className="flex items-center gap-2"><CalendarClock size={16} className="text-primary" /> 15. August 2026</span>
               <span className="hidden sm:block text-border">|</span>
               <span className="flex items-center gap-2"><MapPin size={16} className="text-primary" /> Schloss Elmau, Bayern</span>
             </div>
+
+            {/* Countdown */}
+            <div className="mt-6 inline-flex items-center gap-4 px-6 py-4 bg-card rounded-2xl border border-border shadow-sm">
+              {[
+                { val: daysLeft, label: "Tage" },
+                { val: Math.floor((diffMs / (1000 * 60 * 60)) % 24), label: "Std" },
+                { val: Math.floor((diffMs / (1000 * 60)) % 60), label: "Min" },
+              ].map((u, i) => (
+                <div key={i} className="text-center">
+                  <span className="font-heading text-2xl md:text-3xl font-bold text-primary">{u.val}</span>
+                  <p className="text-xs text-muted-foreground font-body">{u.label}</p>
+                </div>
+              ))}
+            </div>
+
             <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-champagne rounded-full text-sm font-body">
               <Sparkles size={14} className="text-primary" />
               <span className="text-foreground font-medium">Status: Zugesagt</span>
@@ -166,9 +229,7 @@ const GuestPortalDemo = () => {
               {schedule.map((e, i) => (
                 <div key={i} className="flex gap-4">
                   <div className="flex flex-col items-center">
-                    <div className="w-11 h-11 rounded-full bg-champagne flex items-center justify-center text-lg flex-shrink-0">
-                      {e.icon}
-                    </div>
+                    <div className="w-11 h-11 rounded-full bg-champagne flex items-center justify-center text-lg flex-shrink-0">{e.icon}</div>
                     {i < schedule.length - 1 && <div className="w-px flex-1 bg-border my-1" />}
                   </div>
                   <div className="pb-5 flex-1">
@@ -200,8 +261,6 @@ const GuestPortalDemo = () => {
                 </div>
               </div>
             </div>
-            
-            {/* Visual table */}
             <div className="relative mx-auto mb-8" style={{ width: 220, height: 220 }}>
               <div className="absolute inset-0 rounded-full border-2 border-border bg-secondary/20 flex items-center justify-center">
                 <span className="text-sm font-body text-muted-foreground">{seatingInfo.table}</span>
@@ -212,20 +271,14 @@ const GuestPortalDemo = () => {
                 const cy = 110 + 92 * Math.sin(angle) - 20;
                 const isYou = name.includes("Du");
                 return (
-                  <div
-                    key={i}
-                    className={`absolute w-10 h-10 rounded-full flex items-center justify-center text-xs font-heading font-bold ${
-                      isYou ? "bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2" : "bg-champagne text-primary border-2 border-primary/20"
-                    }`}
-                    style={{ left: cx, top: cy }}
-                    title={name}
-                  >
+                  <div key={i} className={`absolute w-10 h-10 rounded-full flex items-center justify-center text-xs font-heading font-bold ${
+                    isYou ? "bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2" : "bg-champagne text-primary border-2 border-primary/20"
+                  }`} style={{ left: cx, top: cy }} title={name}>
                     {name.split(" ").map(n => n[0]).join("").substring(0, 2)}
                   </div>
                 );
               })}
             </div>
-            
             <h3 className="font-heading text-lg font-semibold text-foreground mb-3">Deine Tischpartner</h3>
             <div className="grid sm:grid-cols-2 gap-2">
               {seatingInfo.tablemates.map((name, i) => (
@@ -247,7 +300,6 @@ const GuestPortalDemo = () => {
               <Utensils size={22} className="text-primary" /> Menü
             </h2>
             <p className="text-sm text-muted-foreground font-body mb-6">Deine Wahl: <span className="text-foreground font-medium">Vegetarisch</span></p>
-            
             {menuItems.map((course, ci) => (
               <div key={ci} className="mb-8 last:mb-0">
                 <h3 className="font-heading text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
@@ -269,6 +321,76 @@ const GuestPortalDemo = () => {
                 </div>
               </div>
             ))}
+          </motion.div>
+        )}
+
+        {/* Wishlist Tab */}
+        {activeTab === "wishlist" && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-card rounded-2xl border border-border p-6 md:p-8">
+            <h2 className="font-heading text-2xl font-bold text-foreground flex items-center gap-2 mb-2">
+              <Gift size={22} className="text-primary" /> Wunschliste
+            </h2>
+            <p className="text-sm text-muted-foreground font-body mb-6">
+              Wir freuen uns über eure Anwesenheit! Falls ihr uns etwas schenken möchtet, haben wir eine kleine Liste zusammengestellt.
+            </p>
+
+            {/* Category filter */}
+            <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
+              {wishlistCategories.map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => setWishlistFilter(cat)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-body font-medium whitespace-nowrap transition-all ${
+                    wishlistFilter === cat ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-3">
+              {filteredWishlist.map(item => {
+                const isReserved = reservedItems.includes(item.id);
+                return (
+                  <div key={item.id} className={`rounded-xl border p-4 transition-all ${
+                    isReserved ? "border-primary/30 bg-champagne/30" : "border-border hover:border-primary/20"
+                  }`}>
+                    <div className="flex items-start gap-3">
+                      <span className="text-3xl">{item.image}</span>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-heading font-semibold text-foreground text-sm">{item.name}</h4>
+                        <p className="text-sm font-body text-primary font-medium mt-0.5">{item.price}</p>
+                        <span className="text-xs text-muted-foreground font-body">{item.category}</span>
+                      </div>
+                    </div>
+                    <div className="mt-3 flex items-center gap-2">
+                      {isReserved ? (
+                        <span className="text-xs font-body text-primary bg-champagne px-3 py-1.5 rounded-lg flex items-center gap-1.5">
+                          <Sparkles size={12} /> Reserviert {item.reserved && item.reservedBy ? `von ${item.reservedBy}` : "von dir"}
+                        </span>
+                      ) : (
+                        <>
+                          <Button size="sm" variant="outline" className="font-body text-xs flex-1" onClick={() => handleReserve(item.id)}>
+                            <ShoppingCart size={12} className="mr-1" /> Reservieren
+                          </Button>
+                          <Button size="sm" variant="outline" className="font-body text-xs">
+                            <ExternalLink size={12} />
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="mt-6 bg-champagne/50 rounded-xl p-4 text-center">
+              <p className="text-sm font-body text-foreground">
+                💰 <strong>Flitterwochen-Kasse:</strong> Ihr könnt auch einen beliebigen Betrag zu unserer Reise beitragen.
+              </p>
+              <Button variant="outline" size="sm" className="font-body mt-3">✈️ Zur Flitterwochen-Kasse</Button>
+            </div>
           </motion.div>
         )}
 
@@ -310,7 +432,7 @@ const GuestPortalDemo = () => {
                   </ul>
                 </div>
               </div>
-              <div className="bg-gold-light/50 rounded-xl p-4">
+              <div className="bg-secondary/30 rounded-xl p-4">
                 <p className="text-sm font-body text-foreground">
                   🚌 <strong>Shuttle-Rückfahrt:</strong> Um 23:00, 00:00 und 01:00 Uhr zurück nach Klais und zu den Hotels.
                 </p>
@@ -343,6 +465,53 @@ const GuestPortalDemo = () => {
                     <Button variant="outline" size="sm" className="font-body self-start sm:self-center">Zur Buchung</Button>
                   </div>
                 </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Guestbook Tab */}
+        {activeTab === "guestbook" && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-card rounded-2xl border border-border p-6 md:p-8">
+            <h2 className="font-heading text-2xl font-bold text-foreground flex items-center gap-2 mb-6">
+              <MessageCircle size={22} className="text-primary" /> Digitales Gästebuch
+            </h2>
+            
+            {/* Write entry */}
+            <div className="bg-champagne/30 rounded-xl p-5 mb-6">
+              <label className="block text-sm font-body font-medium text-foreground mb-2">Schreib uns etwas 💌</label>
+              <textarea
+                value={guestbookMsg}
+                onChange={e => setGuestbookMsg(e.target.value)}
+                placeholder="Glückwünsche, Erinnerungen, lustige Geschichten..."
+                rows={3}
+                className="w-full px-4 py-3 rounded-xl border border-border bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+              />
+              <Button size="sm" className="font-body mt-3" onClick={handleGuestbookSubmit} disabled={!guestbookMsg.trim()}>
+                <Heart size={14} className="mr-1.5" /> Eintrag absenden
+              </Button>
+            </div>
+
+            {/* Entries */}
+            <div className="space-y-3">
+              {localEntries.map((entry, i) => (
+                <motion.div
+                  key={i}
+                  initial={i === 0 ? { opacity: 0, y: -10 } : {}}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-secondary/30 rounded-xl p-4"
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-8 h-8 rounded-full bg-champagne flex items-center justify-center text-xs font-heading font-bold text-primary">
+                      {entry.name.split(" ").map(n => n[0]).join("").substring(0, 2)}
+                    </div>
+                    <div>
+                      <p className="text-sm font-body font-medium text-foreground">{entry.name}</p>
+                      <p className="text-xs text-muted-foreground font-body">{entry.date}</p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-foreground font-body">{entry.message}</p>
+                </motion.div>
               ))}
             </div>
           </motion.div>
