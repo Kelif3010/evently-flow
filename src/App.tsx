@@ -7,6 +7,7 @@ import Index from "./pages/Index.tsx";
 import DemoDashboard from "./pages/DemoDashboard.tsx";
 import GuestPortalDemo from "./pages/GuestPortalDemo.tsx";
 import RSVPPage from "./pages/RSVPPage.tsx";
+import OnboardingPage from "./pages/OnboardingPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
