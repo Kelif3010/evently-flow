@@ -3,18 +3,20 @@ import { Link, useLocation } from "react-router-dom";
 import {
   Users, CheckCircle, Utensils, Hotel, CalendarClock,
   ListChecks, LayoutGrid, PieChart, Settings, Home,
-  ChevronLeft, Menu, Bell, LogOut,
+  ChevronLeft, Menu, Bell, LogOut, Camera, Send, Music,
 } from "lucide-react";
 
 const navItems = [
   { icon: Home, label: "Übersicht", path: "/demo/dashboard" },
   { icon: Users, label: "Gäste", path: "/demo/dashboard/guests" },
+  { icon: Send, label: "Einladungen", path: "/demo/dashboard/invitations" },
   { icon: CheckCircle, label: "RSVP", path: "/demo/dashboard/rsvp" },
   { icon: Utensils, label: "Essen & Allergien", path: "/demo/dashboard/meals" },
-  { icon: Hotel, label: "Hotels", path: "/demo/dashboard/hotels" },
-  { icon: CalendarClock, label: "Zeitplan", path: "/demo/dashboard/timeline" },
-  { icon: ListChecks, label: "Aufgaben", path: "/demo/dashboard/tasks" },
   { icon: LayoutGrid, label: "Tischplanung", path: "/demo/dashboard/seating" },
+  { icon: CalendarClock, label: "Zeitplan", path: "/demo/dashboard/timeline" },
+  { icon: Camera, label: "Fotogalerie", path: "/demo/dashboard/photos" },
+  { icon: Music, label: "Musik", path: "/demo/dashboard/music" },
+  { icon: ListChecks, label: "Aufgaben", path: "/demo/dashboard/tasks" },
   { icon: PieChart, label: "Budget", path: "/demo/dashboard/budget" },
   { icon: Settings, label: "Einstellungen", path: "/demo/dashboard/settings" },
 ];

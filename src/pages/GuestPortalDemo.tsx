@@ -93,10 +93,31 @@ const GuestPortalDemo = () => {
   const [localEntries, setLocalEntries] = useState(guestbookEntries);
   const [wishlistFilter, setWishlistFilter] = useState("Alle");
 
+  const [photoUploadName, setPhotoUploadName] = useState("");
+  const [guestSongTitle, setGuestSongTitle] = useState("");
+  const [guestSongArtist, setGuestSongArtist] = useState("");
+  const [guestSongs, setGuestSongs] = useState([
+    { title: "Perfect", artist: "Ed Sheeran", addedBy: "Brautpaar", likes: 15 },
+    { title: "Uptown Funk", artist: "Bruno Mars", addedBy: "Thomas M.", likes: 11 },
+    { title: "Can't Help Falling in Love", artist: "Elvis Presley", addedBy: "Sophie W.", likes: 8 },
+    { title: "Don't Stop Me Now", artist: "Queen", addedBy: "Anna H.", likes: 7 },
+    { title: "I Gotta Feeling", artist: "Black Eyed Peas", addedBy: "Lena S.", likes: 6 },
+  ]);
+  const [guestPhotos, setGuestPhotos] = useState([
+    { emoji: "📸", uploadedBy: "Thomas M.", likes: 8 },
+    { emoji: "💐", uploadedBy: "Anna H.", likes: 12 },
+    { emoji: "🥂", uploadedBy: "Lena S.", likes: 5 },
+    { emoji: "💍", uploadedBy: "Felix B.", likes: 24 },
+    { emoji: "🎂", uploadedBy: "Emma W.", likes: 15 },
+    { emoji: "💃", uploadedBy: "Nico K.", likes: 7 },
+  ]);
+
   const tabs = [
     { id: "schedule", label: "Tagesablauf", icon: Clock },
     { id: "seating", label: "Dein Tisch", icon: Users },
     { id: "menu", label: "Menü", icon: Utensils },
+    { id: "photos", label: "Fotos", icon: Camera },
+    { id: "music", label: "Musik", icon: Music },
     { id: "wishlist", label: "Wunschliste", icon: Gift },
     { id: "travel", label: "Anreise", icon: MapPin },
     { id: "hotels", label: "Hotels", icon: Hotel },
@@ -321,6 +342,109 @@ const GuestPortalDemo = () => {
                 </div>
               </div>
             ))}
+          </motion.div>
+        )}
+
+        {/* Photos Tab */}
+        {activeTab === "photos" && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-card rounded-2xl border border-border p-6 md:p-8">
+            <h2 className="font-heading text-2xl font-bold text-foreground flex items-center gap-2 mb-2">
+              <Camera size={22} className="text-primary" /> Hochzeitsfotos
+            </h2>
+            <p className="text-sm text-muted-foreground font-body mb-6">
+              Teile deine schönsten Momente mit dem Brautpaar! 📸
+            </p>
+
+            {/* Upload area */}
+            <div className="border-2 border-dashed border-border rounded-xl p-8 text-center mb-6 hover:border-primary/30 transition-colors cursor-pointer">
+              <Camera size={32} className="mx-auto text-muted-foreground mb-3" />
+              <p className="font-body text-sm font-medium text-foreground">Fotos hochladen</p>
+              <p className="text-xs text-muted-foreground font-body mt-1">Klicke hier oder ziehe Fotos hierher</p>
+            </div>
+
+            {/* Photo Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {guestPhotos.map((photo, i) => (
+                <div key={i} className="aspect-square bg-secondary/50 rounded-xl flex items-center justify-center text-5xl relative group">
+                  {photo.emoji}
+                  <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
+                    <span className="text-xs font-body bg-card/80 backdrop-blur px-2 py-1 rounded-lg text-foreground">{photo.uploadedBy}</span>
+                    <span className="flex items-center gap-1 text-xs bg-card/80 backdrop-blur px-2 py-1 rounded-lg text-foreground">
+                      <Heart size={10} /> {photo.likes}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Music Tab */}
+        {activeTab === "music" && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-card rounded-2xl border border-border p-6 md:p-8">
+            <h2 className="font-heading text-2xl font-bold text-foreground flex items-center gap-2 mb-2">
+              <Music size={22} className="text-primary" /> Playlist
+            </h2>
+            <p className="text-sm text-muted-foreground font-body mb-6">
+              Füge deine Lieblingssongs zur Hochzeitsplaylist hinzu! 🎶
+            </p>
+
+            {/* Spotify/Apple Music Links */}
+            <div className="grid sm:grid-cols-2 gap-3 mb-6">
+              <a href="https://open.spotify.com" target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-3 p-4 bg-secondary/30 rounded-xl hover:bg-secondary/50 transition-colors">
+                <span className="text-2xl">🎵</span>
+                <div>
+                  <p className="text-sm font-body font-medium text-foreground">Spotify Playlist</p>
+                  <p className="text-xs text-primary font-body">Öffnen & Songs hinzufügen →</p>
+                </div>
+              </a>
+              <a href="https://music.apple.com" target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-3 p-4 bg-secondary/30 rounded-xl hover:bg-secondary/50 transition-colors">
+                <span className="text-2xl">🎶</span>
+                <div>
+                  <p className="text-sm font-body font-medium text-foreground">Apple Music Playlist</p>
+                  <p className="text-xs text-primary font-body">Öffnen & Songs hinzufügen →</p>
+                </div>
+              </a>
+            </div>
+
+            {/* Add Song */}
+            <div className="bg-champagne/30 rounded-xl p-5 mb-6">
+              <label className="block text-sm font-body font-medium text-foreground mb-2">Songwunsch hinzufügen 🎤</label>
+              <div className="grid sm:grid-cols-2 gap-2">
+                <input value={guestSongTitle} onChange={e => setGuestSongTitle(e.target.value)} placeholder="Songtitel"
+                  className="px-4 py-2.5 rounded-xl border border-border bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/30" />
+                <input value={guestSongArtist} onChange={e => setGuestSongArtist(e.target.value)} placeholder="Interpret"
+                  className="px-4 py-2.5 rounded-xl border border-border bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              </div>
+              <Button size="sm" className="font-body mt-3" disabled={!guestSongTitle.trim()} onClick={() => {
+                if (!guestSongTitle.trim()) return;
+                setGuestSongs([{ title: guestSongTitle, artist: guestSongArtist, addedBy: "Sophie W.", likes: 0 }, ...guestSongs]);
+                setGuestSongTitle(""); setGuestSongArtist("");
+              }}>
+                <Music size={14} className="mr-1.5" /> Hinzufügen
+              </Button>
+            </div>
+
+            {/* Current Playlist */}
+            <div className="space-y-2">
+              {guestSongs.map((song, i) => (
+                <div key={i} className="flex items-center gap-3 px-4 py-3 bg-secondary/30 rounded-xl">
+                  <span className="text-sm font-body text-muted-foreground w-6 text-right">{i + 1}</span>
+                  <div className="w-8 h-8 rounded-lg bg-champagne flex items-center justify-center text-sm">
+                    {song.addedBy === "Brautpaar" ? "💍" : "🎵"}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-body font-medium text-foreground truncate">{song.title}</p>
+                    <p className="text-xs text-muted-foreground font-body truncate">{song.artist} · {song.addedBy}</p>
+                  </div>
+                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <Heart size={12} /> {song.likes}
+                  </span>
+                </div>
+              ))}
+            </div>
           </motion.div>
         )}
 
