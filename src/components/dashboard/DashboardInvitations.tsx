@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Send, QrCode, Link2, Copy, Check, Mail, MessageCircle, Key, Users, Search, Eye, RefreshCw } from "lucide-react";
+import { Send, QrCode, Link2, Copy, Check, Mail, MessageCircle, Key, Users, Search, Eye, RefreshCw, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 
