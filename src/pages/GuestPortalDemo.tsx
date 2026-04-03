@@ -93,10 +93,31 @@ const GuestPortalDemo = () => {
   const [localEntries, setLocalEntries] = useState(guestbookEntries);
   const [wishlistFilter, setWishlistFilter] = useState("Alle");
 
+  const [photoUploadName, setPhotoUploadName] = useState("");
+  const [guestSongTitle, setGuestSongTitle] = useState("");
+  const [guestSongArtist, setGuestSongArtist] = useState("");
+  const [guestSongs, setGuestSongs] = useState([
+    { title: "Perfect", artist: "Ed Sheeran", addedBy: "Brautpaar", likes: 15 },
+    { title: "Uptown Funk", artist: "Bruno Mars", addedBy: "Thomas M.", likes: 11 },
+    { title: "Can't Help Falling in Love", artist: "Elvis Presley", addedBy: "Sophie W.", likes: 8 },
+    { title: "Don't Stop Me Now", artist: "Queen", addedBy: "Anna H.", likes: 7 },
+    { title: "I Gotta Feeling", artist: "Black Eyed Peas", addedBy: "Lena S.", likes: 6 },
+  ]);
+  const [guestPhotos, setGuestPhotos] = useState([
+    { emoji: "📸", uploadedBy: "Thomas M.", likes: 8 },
+    { emoji: "💐", uploadedBy: "Anna H.", likes: 12 },
+    { emoji: "🥂", uploadedBy: "Lena S.", likes: 5 },
+    { emoji: "💍", uploadedBy: "Felix B.", likes: 24 },
+    { emoji: "🎂", uploadedBy: "Emma W.", likes: 15 },
+    { emoji: "💃", uploadedBy: "Nico K.", likes: 7 },
+  ]);
+
   const tabs = [
     { id: "schedule", label: "Tagesablauf", icon: Clock },
     { id: "seating", label: "Dein Tisch", icon: Users },
     { id: "menu", label: "Menü", icon: Utensils },
+    { id: "photos", label: "Fotos", icon: Camera },
+    { id: "music", label: "Musik", icon: Music },
     { id: "wishlist", label: "Wunschliste", icon: Gift },
     { id: "travel", label: "Anreise", icon: MapPin },
     { id: "hotels", label: "Hotels", icon: Hotel },
