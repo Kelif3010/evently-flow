@@ -10,12 +10,16 @@ import DashboardTimeline from "@/components/dashboard/DashboardTimeline";
 import DashboardBudget from "@/components/dashboard/DashboardBudget";
 import DashboardTasks from "@/components/dashboard/DashboardTasks";
 import DashboardSettings from "@/components/dashboard/DashboardSettings";
+import DashboardPhotos from "@/components/dashboard/DashboardPhotos";
+import DashboardInvitations from "@/components/dashboard/DashboardInvitations";
+import DashboardMusic from "@/components/dashboard/DashboardMusic";
 
 const DemoDashboard = () => (
   <DashboardLayout>
     <Routes>
       <Route index element={<DashboardOverview />} />
       <Route path="guests" element={<DashboardGuests />} />
+      <Route path="invitations" element={<DashboardInvitations />} />
       <Route path="seating" element={<DashboardSeating />} />
       <Route path="rsvp" element={<DashboardRSVP />} />
       <Route path="rsvp-builder" element={<DashboardRSVPBuilder />} />
@@ -23,6 +27,8 @@ const DemoDashboard = () => (
       <Route path="timeline" element={<DashboardTimeline />} />
       <Route path="budget" element={<DashboardBudget />} />
       <Route path="tasks" element={<DashboardTasks />} />
+      <Route path="photos" element={<DashboardPhotos />} />
+      <Route path="music" element={<DashboardMusic />} />
       <Route path="settings" element={<DashboardSettings />} />
     </Routes>
   </DashboardLayout>
