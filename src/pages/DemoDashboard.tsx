@@ -13,6 +13,10 @@ import DashboardSettings from "@/components/dashboard/DashboardSettings";
 import DashboardPhotos from "@/components/dashboard/DashboardPhotos";
 import DashboardInvitations from "@/components/dashboard/DashboardInvitations";
 import DashboardMusic from "@/components/dashboard/DashboardMusic";
+import DashboardWishlist from "@/components/dashboard/DashboardWishlist";
+import DashboardGuestbook from "@/components/dashboard/DashboardGuestbook";
+import DashboardHoneymoon from "@/components/dashboard/DashboardHoneymoon";
+import DashboardGuestPortalConfig from "@/components/dashboard/DashboardGuestPortalConfig";
 
 const DemoDashboard = () => (
   <DashboardLayout>
@@ -29,6 +33,10 @@ const DemoDashboard = () => (
       <Route path="tasks" element={<DashboardTasks />} />
       <Route path="photos" element={<DashboardPhotos />} />
       <Route path="music" element={<DashboardMusic />} />
+      <Route path="wishlist" element={<DashboardWishlist />} />
+      <Route path="guestbook" element={<DashboardGuestbook />} />
+      <Route path="honeymoon" element={<DashboardHoneymoon />} />
+      <Route path="guest-portal-config" element={<DashboardGuestPortalConfig />} />
       <Route path="settings" element={<DashboardSettings />} />
     </Routes>
   </DashboardLayout>
