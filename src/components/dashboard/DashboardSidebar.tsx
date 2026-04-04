@@ -1,24 +1,58 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
-  Users, CheckCircle, Utensils, Hotel, CalendarClock,
+  Users, CheckCircle, Utensils, CalendarClock,
   ListChecks, LayoutGrid, PieChart, Settings, Home,
-  ChevronLeft, Menu, Bell, LogOut, Camera, Send, Music,
+  ChevronLeft, Menu, Camera, Send, Music, Gift, BookOpen, Globe, Monitor,
 } from "lucide-react";
 
-const navItems = [
-  { icon: Home, label: "Übersicht", path: "/demo/dashboard" },
-  { icon: Users, label: "Gäste", path: "/demo/dashboard/guests" },
-  { icon: Send, label: "Einladungen", path: "/demo/dashboard/invitations" },
-  { icon: CheckCircle, label: "RSVP", path: "/demo/dashboard/rsvp" },
-  { icon: Utensils, label: "Essen & Allergien", path: "/demo/dashboard/meals" },
-  { icon: LayoutGrid, label: "Tischplanung", path: "/demo/dashboard/seating" },
-  { icon: CalendarClock, label: "Zeitplan", path: "/demo/dashboard/timeline" },
-  { icon: Camera, label: "Fotogalerie", path: "/demo/dashboard/photos" },
-  { icon: Music, label: "Musik", path: "/demo/dashboard/music" },
-  { icon: ListChecks, label: "Aufgaben", path: "/demo/dashboard/tasks" },
-  { icon: PieChart, label: "Budget", path: "/demo/dashboard/budget" },
-  { icon: Settings, label: "Einstellungen", path: "/demo/dashboard/settings" },
+interface NavCategory {
+  label: string;
+  items: { icon: any; label: string; path: string }[];
+}
+
+const navCategories: NavCategory[] = [
+  {
+    label: "Allgemein",
+    items: [
+      { icon: Home, label: "Übersicht", path: "/demo/dashboard" },
+      { icon: Users, label: "Gäste", path: "/demo/dashboard/guests" },
+    ],
+  },
+  {
+    label: "Kommunikation",
+    items: [
+      { icon: Send, label: "Einladungen", path: "/demo/dashboard/invitations" },
+      { icon: CheckCircle, label: "RSVP", path: "/demo/dashboard/rsvp" },
+      { icon: Monitor, label: "Gästeseite", path: "/demo/dashboard/guest-portal-config" },
+    ],
+  },
+  {
+    label: "Planung",
+    items: [
+      { icon: Utensils, label: "Essen & Allergien", path: "/demo/dashboard/meals" },
+      { icon: LayoutGrid, label: "Tischplanung", path: "/demo/dashboard/seating" },
+      { icon: CalendarClock, label: "Zeitplan", path: "/demo/dashboard/timeline" },
+    ],
+  },
+  {
+    label: "Erlebnis",
+    items: [
+      { icon: Camera, label: "Fotogalerie", path: "/demo/dashboard/photos" },
+      { icon: Music, label: "Musik", path: "/demo/dashboard/music" },
+      { icon: Gift, label: "Wunschliste", path: "/demo/dashboard/wishlist" },
+      { icon: BookOpen, label: "Gästebuch", path: "/demo/dashboard/guestbook" },
+      { icon: Globe, label: "Flitterwochen", path: "/demo/dashboard/honeymoon" },
+    ],
+  },
+  {
+    label: "Verwaltung",
+    items: [
+      { icon: ListChecks, label: "Aufgaben", path: "/demo/dashboard/tasks" },
+      { icon: PieChart, label: "Budget", path: "/demo/dashboard/budget" },
+      { icon: Settings, label: "Einstellungen", path: "/demo/dashboard/settings" },
+    ],
+  },
 ];
 
 const DashboardSidebar = () => {
@@ -27,12 +61,12 @@ const DashboardSidebar = () => {
 
   return (
     <aside
-      className={`hidden md:flex flex-col bg-card border-r border-border transition-all duration-300 ${
+      className={`hidden md:flex flex-col bg-card border-r border-border transition-all duration-300 h-screen ${
         collapsed ? "w-16" : "w-60"
       }`}
     >
       {/* Logo */}
-      <div className="h-16 flex items-center justify-between px-4 border-b border-border">
+      <div className="h-14 flex items-center justify-between px-4 border-b border-border flex-shrink-0">
         {!collapsed && (
           <Link to="/" className="font-heading text-xl font-bold text-gradient-gold">
             Evoria
@@ -47,29 +81,40 @@ const DashboardSidebar = () => {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 py-4 px-2 space-y-1 overflow-y-auto">
-        {navItems.map((item) => {
-          const active = location.pathname === item.path;
-          return (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-body transition-colors ${
-                active
-                  ? "bg-champagne text-foreground font-medium"
-                  : "text-muted-foreground hover:bg-secondary hover:text-foreground"
-              }`}
-              title={collapsed ? item.label : undefined}
-            >
-              <item.icon size={18} className={active ? "text-primary" : ""} />
-              {!collapsed && <span>{item.label}</span>}
-            </Link>
-          );
-        })}
+      <nav className="flex-1 py-3 px-2 overflow-y-auto">
+        {navCategories.map((cat) => (
+          <div key={cat.label} className="mb-3">
+            {!collapsed && (
+              <p className="px-3 mb-1 text-[10px] uppercase tracking-wider text-muted-foreground/70 font-body font-semibold">
+                {cat.label}
+              </p>
+            )}
+            <div className="space-y-0.5">
+              {cat.items.map((item) => {
+                const active = location.pathname === item.path;
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-body transition-colors ${
+                      active
+                        ? "bg-champagne text-foreground font-medium"
+                        : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                    }`}
+                    title={collapsed ? item.label : undefined}
+                  >
+                    <item.icon size={17} className={active ? "text-primary" : ""} />
+                    {!collapsed && <span>{item.label}</span>}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
 
       {/* Bottom */}
-      <div className="p-3 border-t border-border">
+      <div className="p-3 border-t border-border flex-shrink-0">
         <div className={`flex items-center gap-3 ${collapsed ? "justify-center" : ""}`}>
           <div className="w-8 h-8 rounded-full bg-champagne flex items-center justify-center text-sm font-heading font-bold text-primary">
             L&M
