@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Users, Search, Plus, Filter, Download, Mail, Trash2, Edit2, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface Guest {
   id: number;
@@ -32,8 +33,8 @@ const DashboardGuests = () => {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("Alle");
   const [filterGroup, setFilterGroup] = useState<string>("Alle");
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [newGuest, setNewGuest] = useState({ name: "", email: "", group: "Freunde" });
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [newGuest, setNewGuest] = useState({ name: "", email: "", group: "Freunde", meal: "–", plusOne: "" });
   const [selectedGuests, setSelectedGuests] = useState<number[]>([]);
 
   const groups = ["Alle", ...Array.from(new Set(guests.map(g => g.group)))];
@@ -53,15 +54,15 @@ const DashboardGuests = () => {
       name: newGuest.name,
       email: newGuest.email,
       status: "Ausstehend",
-      meal: "–",
+      meal: newGuest.meal,
       allergies: "–",
-      plusOne: "–",
+      plusOne: newGuest.plusOne || "–",
       table: "–",
       group: newGuest.group,
     };
     setGuests([...guests, guest]);
-    setNewGuest({ name: "", email: "", group: "Freunde" });
-    setShowAddModal(false);
+    setNewGuest({ name: "", email: "", group: "Freunde", meal: "–", plusOne: "" });
+    setShowAddDialog(false);
   };
 
   const removeGuest = (id: number) => setGuests(guests.filter(g => g.id !== id));
@@ -84,7 +85,6 @@ const DashboardGuests = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="font-heading text-2xl font-bold text-foreground flex items-center gap-2">
@@ -97,7 +97,7 @@ const DashboardGuests = () => {
         <div className="flex gap-2">
           <Button variant="outline" size="sm" className="font-body"><Download size={14} className="mr-1.5" /> Export</Button>
           <Button variant="outline" size="sm" className="font-body"><Mail size={14} className="mr-1.5" /> Einladen</Button>
-          <Button size="sm" className="font-body" onClick={() => setShowAddModal(true)}><Plus size={14} className="mr-1.5" /> Gast hinzufügen</Button>
+          <Button size="sm" className="font-body" onClick={() => setShowAddDialog(true)}><Plus size={14} className="mr-1.5" /> Gast hinzufügen</Button>
         </div>
       </div>
 
@@ -122,26 +122,41 @@ const DashboardGuests = () => {
         </div>
       </div>
 
-      {/* Add Modal */}
-      {showAddModal && (
-        <div className="bg-card rounded-xl border border-border p-6 space-y-4">
-          <h3 className="font-heading text-lg font-semibold text-foreground">Neuen Gast hinzufügen</h3>
-          <div className="grid sm:grid-cols-3 gap-3">
-            <input value={newGuest.name} onChange={e => setNewGuest({...newGuest, name: e.target.value})} placeholder="Name" className="px-4 py-2.5 rounded-lg border border-border bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/30" />
-            <input value={newGuest.email} onChange={e => setNewGuest({...newGuest, email: e.target.value})} placeholder="E-Mail" className="px-4 py-2.5 rounded-lg border border-border bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/30" />
-            <select value={newGuest.group} onChange={e => setNewGuest({...newGuest, group: e.target.value})} className="px-3 py-2.5 rounded-lg border border-border bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/30">
-              <option>Familie Braut</option>
-              <option>Familie Bräutigam</option>
-              <option>Freunde</option>
-              <option>Kollegen</option>
-            </select>
+      {/* Add Guest Dialog */}
+      <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-heading">Neuen Gast hinzufügen</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <label className="block text-sm font-body font-medium text-foreground mb-1.5">Name *</label>
+              <input value={newGuest.name} onChange={e => setNewGuest({...newGuest, name: e.target.value})} placeholder="Vor- und Nachname" className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            </div>
+            <div>
+              <label className="block text-sm font-body font-medium text-foreground mb-1.5">E-Mail</label>
+              <input value={newGuest.email} onChange={e => setNewGuest({...newGuest, email: e.target.value})} placeholder="email@beispiel.de" className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            </div>
+            <div>
+              <label className="block text-sm font-body font-medium text-foreground mb-1.5">Gruppe</label>
+              <select value={newGuest.group} onChange={e => setNewGuest({...newGuest, group: e.target.value})} className="w-full px-3 py-2.5 rounded-lg border border-border bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/30">
+                <option>Familie Braut</option>
+                <option>Familie Bräutigam</option>
+                <option>Freunde</option>
+                <option>Kollegen</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-body font-medium text-foreground mb-1.5">Begleitperson</label>
+              <input value={newGuest.plusOne} onChange={e => setNewGuest({...newGuest, plusOne: e.target.value})} placeholder="Name der Begleitperson (optional)" className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            </div>
+            <div className="flex gap-2 pt-2">
+              <Button className="font-body flex-1" onClick={addGuest}>Hinzufügen</Button>
+              <Button variant="outline" className="font-body" onClick={() => setShowAddDialog(false)}>Abbrechen</Button>
+            </div>
           </div>
-          <div className="flex gap-2">
-            <Button size="sm" className="font-body" onClick={addGuest}>Hinzufügen</Button>
-            <Button variant="outline" size="sm" className="font-body" onClick={() => setShowAddModal(false)}>Abbrechen</Button>
-          </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
 
       {/* Table */}
       <div className="bg-card rounded-xl border border-border overflow-hidden">
@@ -192,7 +207,7 @@ const DashboardGuests = () => {
                     <span className="text-sm font-body text-muted-foreground">{g.table}</span>
                   </td>
                   <td className="p-4 text-right">
-                    <button className="p-1.5 rounded hover:bg-secondary text-muted-foreground" onClick={() => removeGuest(g.id)}>
+                    <button className="p-1.5 rounded hover:bg-secondary text-muted-foreground hover:text-destructive transition-colors" onClick={() => removeGuest(g.id)}>
                       <Trash2 size={14} />
                     </button>
                   </td>
@@ -207,7 +222,7 @@ const DashboardGuests = () => {
       </div>
 
       {selectedGuests.length > 0 && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-foreground text-background rounded-xl px-6 py-3 flex items-center gap-4 shadow-xl z-40">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-foreground text-background rounded-xl px-6 py-3 flex items-center gap-4 shadow-xl z-40 animate-fade-in">
           <span className="text-sm font-body">{selectedGuests.length} ausgewählt</span>
           <Button size="sm" variant="outline" className="font-body text-foreground border-background/30 hover:bg-background/10">
             <Mail size={14} className="mr-1.5" /> E-Mail senden

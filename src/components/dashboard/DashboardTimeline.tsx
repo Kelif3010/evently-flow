@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { CalendarClock, Plus, GripVertical, Edit2, Trash2, Check, X, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface TimelineEvent {
   id: number;
@@ -34,10 +35,7 @@ const DashboardTimeline = () => {
   const [showAdd, setShowAdd] = useState(false);
   const [newEvent, setNewEvent] = useState<Partial<TimelineEvent>>({ time: "", endTime: "", title: "", description: "", icon: "📌", location: "", responsible: "", notes: "" });
 
-  const startEdit = (event: TimelineEvent) => {
-    setEditingId(event.id);
-    setEditData(event);
-  };
+  const startEdit = (event: TimelineEvent) => { setEditingId(event.id); setEditData(event); };
 
   const saveEdit = () => {
     setEvents(events.map(e => e.id === editingId ? { ...e, ...editData } as TimelineEvent : e));
@@ -57,9 +55,7 @@ const DashboardTimeline = () => {
 
   const totalDuration = () => {
     if (events.length < 2) return "–";
-    const first = events[0].time;
-    const last = events[events.length - 1].endTime;
-    return `${first} – ${last}`;
+    return `${events[0].time} – ${events[events.length - 1].endTime}`;
   };
 
   return (
@@ -73,38 +69,60 @@ const DashboardTimeline = () => {
             {events.length} Programmpunkte · {totalDuration()}
           </p>
         </div>
-        <Button size="sm" className="font-body" onClick={() => setShowAdd(!showAdd)}>
+        <Button size="sm" className="font-body" onClick={() => setShowAdd(true)}>
           <Plus size={14} className="mr-1.5" /> Programmpunkt hinzufügen
         </Button>
       </div>
 
-      {/* Add Form */}
-      {showAdd && (
-        <div className="bg-card rounded-xl border border-border p-6 space-y-4">
-          <h3 className="font-heading text-lg font-semibold text-foreground">Neuer Programmpunkt</h3>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <input value={newEvent.time} onChange={e => setNewEvent({...newEvent, time: e.target.value})} placeholder="Uhrzeit (z.B. 14:00)" className="px-4 py-2.5 rounded-lg border border-border bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/30" />
-            <input value={newEvent.endTime} onChange={e => setNewEvent({...newEvent, endTime: e.target.value})} placeholder="Ende (z.B. 15:00)" className="px-4 py-2.5 rounded-lg border border-border bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/30" />
-            <input value={newEvent.title} onChange={e => setNewEvent({...newEvent, title: e.target.value})} placeholder="Titel" className="px-4 py-2.5 rounded-lg border border-border bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/30" />
-            <input value={newEvent.icon} onChange={e => setNewEvent({...newEvent, icon: e.target.value})} placeholder="Emoji (z.B. 🎶)" className="px-4 py-2.5 rounded-lg border border-border bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/30" />
+      {/* Add Dialog */}
+      <Dialog open={showAdd} onOpenChange={setShowAdd}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-heading">Neuer Programmpunkt</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-body font-medium text-foreground mb-1.5">Beginn *</label>
+                <input value={newEvent.time} onChange={e => setNewEvent({...newEvent, time: e.target.value})} placeholder="14:00" className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              </div>
+              <div>
+                <label className="block text-sm font-body font-medium text-foreground mb-1.5">Ende</label>
+                <input value={newEvent.endTime} onChange={e => setNewEvent({...newEvent, endTime: e.target.value})} placeholder="15:00" className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-body font-medium text-foreground mb-1.5">Titel *</label>
+              <input value={newEvent.title} onChange={e => setNewEvent({...newEvent, title: e.target.value})} placeholder="Name des Programmpunkts" className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            </div>
+            <div>
+              <label className="block text-sm font-body font-medium text-foreground mb-1.5">Beschreibung</label>
+              <input value={newEvent.description} onChange={e => setNewEvent({...newEvent, description: e.target.value})} placeholder="Kurze Beschreibung" className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-body font-medium text-foreground mb-1.5">Ort</label>
+                <input value={newEvent.location} onChange={e => setNewEvent({...newEvent, location: e.target.value})} placeholder="z.B. Festsaal" className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              </div>
+              <div>
+                <label className="block text-sm font-body font-medium text-foreground mb-1.5">Emoji</label>
+                <input value={newEvent.icon} onChange={e => setNewEvent({...newEvent, icon: e.target.value})} placeholder="🎶" className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              </div>
+            </div>
+            <div className="flex gap-2 pt-2">
+              <Button className="font-body flex-1" onClick={addEvent}>Hinzufügen</Button>
+              <Button variant="outline" className="font-body" onClick={() => setShowAdd(false)}>Abbrechen</Button>
+            </div>
           </div>
-          <div className="grid sm:grid-cols-2 gap-3">
-            <input value={newEvent.description} onChange={e => setNewEvent({...newEvent, description: e.target.value})} placeholder="Beschreibung" className="px-4 py-2.5 rounded-lg border border-border bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/30" />
-            <input value={newEvent.location} onChange={e => setNewEvent({...newEvent, location: e.target.value})} placeholder="Ort" className="px-4 py-2.5 rounded-lg border border-border bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/30" />
-          </div>
-          <div className="flex gap-2">
-            <Button size="sm" className="font-body" onClick={addEvent}>Hinzufügen</Button>
-            <Button variant="outline" size="sm" className="font-body" onClick={() => setShowAdd(false)}>Abbrechen</Button>
-          </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
 
       {/* Timeline */}
       <div className="space-y-0">
         {events.map((event, i) => (
-          <div key={event.id} className="flex gap-4">
+          <div key={event.id} className="flex gap-4 animate-fade-in" style={{ animationDelay: `${i * 50}ms` }}>
             <div className="flex flex-col items-center">
-              <div className="w-12 h-12 rounded-full bg-champagne flex items-center justify-center text-xl flex-shrink-0">
+              <div className="w-12 h-12 rounded-full bg-champagne flex items-center justify-center text-xl flex-shrink-0 hover:scale-110 transition-transform">
                 {event.icon}
               </div>
               {i < events.length - 1 && <div className="w-px flex-1 bg-border my-1" />}
@@ -124,7 +142,7 @@ const DashboardTimeline = () => {
                   </div>
                 </div>
               ) : (
-                <div className="bg-card rounded-xl border border-border p-4 hover:border-primary/30 transition-colors group">
+                <div className="bg-card rounded-xl border border-border p-4 hover:border-primary/30 hover:shadow-md transition-all group">
                   <div className="flex items-start justify-between">
                     <div>
                       <div className="flex items-center gap-2 mb-1">
@@ -133,12 +151,8 @@ const DashboardTimeline = () => {
                       </div>
                       <h3 className="font-heading font-semibold text-foreground">{event.title}</h3>
                       <p className="text-sm text-muted-foreground font-body mt-0.5">{event.description}</p>
-                      {event.responsible && (
-                        <p className="text-xs text-muted-foreground font-body mt-2">👤 {event.responsible}</p>
-                      )}
-                      {event.notes && (
-                        <p className="text-xs text-primary/70 font-body mt-1">📝 {event.notes}</p>
-                      )}
+                      {event.responsible && <p className="text-xs text-muted-foreground font-body mt-2">👤 {event.responsible}</p>}
+                      {event.notes && <p className="text-xs text-primary/70 font-body mt-1">📝 {event.notes}</p>}
                     </div>
                     <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button onClick={() => startEdit(event)} className="p-1.5 rounded hover:bg-secondary text-muted-foreground"><Edit2 size={14} /></button>
