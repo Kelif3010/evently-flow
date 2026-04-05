@@ -1,6 +1,9 @@
 import { useState } from "react";
-import { PieChart, Plus, Edit2, Trash2, Check, X, TrendingUp, TrendingDown, Euro } from "lucide-react";
+import { PieChart as PieChartIcon, Plus, Trash2, Check, TrendingUp, TrendingDown, Euro, BarChart3, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { useAnimatedNumber } from "@/hooks/useAnimatedNumber";
 
 interface BudgetItem {
   id: number;
@@ -26,11 +29,18 @@ const initialItems: BudgetItem[] = [
   { id: 11, category: "Sonstiges", planned: 1300, actual: 420, paid: false, vendor: "Diverse", notes: "Gastgeschenke, Trinkgelder, Notfallbudget" },
 ];
 
+const COLORS = [
+  "hsl(33, 55%, 48%)", "hsl(350, 35%, 72%)", "hsl(40, 60%, 50%)",
+  "hsl(30, 10%, 55%)", "hsl(200, 50%, 50%)", "hsl(150, 40%, 45%)",
+  "hsl(280, 40%, 55%)", "hsl(20, 60%, 55%)", "hsl(170, 40%, 45%)",
+  "hsl(60, 50%, 50%)", "hsl(0, 0%, 60%)",
+];
+
 const DashboardBudget = () => {
   const [items, setItems] = useState<BudgetItem[]>(initialItems);
   const [showAdd, setShowAdd] = useState(false);
-  const [editId, setEditId] = useState<number | null>(null);
-  const [editData, setEditData] = useState<Partial<BudgetItem>>({});
+  const [filterMode, setFilterMode] = useState<"alle" | "offen" | "bezahlt">("alle");
+  const [activeView, setActiveView] = useState<"overview" | "table">("overview");
   const [newItem, setNewItem] = useState({ category: "", planned: 0, actual: 0, vendor: "", notes: "" });
 
   const totalPlanned = items.reduce((s, i) => s + i.planned, 0);
@@ -38,6 +48,11 @@ const DashboardBudget = () => {
   const totalPaid = items.filter(i => i.paid).reduce((s, i) => s + i.actual, 0);
   const remaining = totalPlanned - totalActual;
   const pctUsed = Math.round((totalActual / totalPlanned) * 100);
+
+  const animPlanned = useAnimatedNumber(totalPlanned);
+  const animActual = useAnimatedNumber(totalActual);
+  const animPaid = useAnimatedNumber(totalPaid);
+  const animRemaining = useAnimatedNumber(Math.abs(remaining));
 
   const addItem = () => {
     if (!newItem.category) return;
@@ -51,74 +66,144 @@ const DashboardBudget = () => {
 
   const fmt = (n: number) => `€${n.toLocaleString("de-DE")}`;
 
+  const filteredItems = items.filter(i => {
+    if (filterMode === "offen") return !i.paid;
+    if (filterMode === "bezahlt") return i.paid;
+    return true;
+  });
+
+  const pieData = items.map(i => ({ name: i.category, value: i.actual }));
+  const barData = items.map(i => ({ name: i.category.length > 8 ? i.category.slice(0, 8) + "…" : i.category, Geplant: i.planned, Ausgegeben: i.actual }));
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="font-heading text-2xl font-bold text-foreground flex items-center gap-2">
-            <PieChart size={24} className="text-primary" /> Budget
+            <PieChartIcon size={24} className="text-primary" /> Budget
           </h2>
           <p className="text-sm text-muted-foreground font-body mt-1">Gesamtbudget und Ausgaben im Überblick</p>
         </div>
-        <Button size="sm" className="font-body" onClick={() => setShowAdd(!showAdd)}>
+        <Button size="sm" className="font-body" onClick={() => setShowAdd(true)}>
           <Plus size={14} className="mr-1.5" /> Position hinzufügen
         </Button>
       </div>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-card rounded-xl border border-border p-5">
-          <p className="text-sm text-muted-foreground font-body">Geplant</p>
-          <p className="text-2xl font-heading font-bold text-foreground mt-1">{fmt(totalPlanned)}</p>
-        </div>
-        <div className="bg-card rounded-xl border border-border p-5">
-          <p className="text-sm text-muted-foreground font-body">Ausgegeben</p>
-          <p className="text-2xl font-heading font-bold text-foreground mt-1">{fmt(totalActual)}</p>
-          <p className="text-xs text-muted-foreground font-body mt-1">{pctUsed}% des Budgets</p>
-        </div>
-        <div className="bg-card rounded-xl border border-border p-5">
-          <p className="text-sm text-muted-foreground font-body">Bezahlt</p>
-          <p className="text-2xl font-heading font-bold text-primary mt-1">{fmt(totalPaid)}</p>
-        </div>
-        <div className="bg-card rounded-xl border border-border p-5">
-          <p className="text-sm text-muted-foreground font-body">Verbleibend</p>
-          <p className={`text-2xl font-heading font-bold mt-1 ${remaining >= 0 ? "text-primary" : "text-destructive"}`}>
-            {remaining >= 0 ? fmt(remaining) : `-${fmt(Math.abs(remaining))}`}
-          </p>
-          <div className="flex items-center gap-1 mt-1">
-            {remaining >= 0 ? <TrendingDown size={12} className="text-primary" /> : <TrendingUp size={12} className="text-destructive" />}
-            <span className="text-xs text-muted-foreground font-body">{remaining >= 0 ? "Unter Budget" : "Über Budget"}</span>
+        {[
+          { label: "Geplant", value: fmt(animPlanned), color: "" },
+          { label: "Ausgegeben", value: fmt(animActual), sub: `${pctUsed}% des Budgets`, color: "" },
+          { label: "Bezahlt", value: fmt(animPaid), color: "text-primary" },
+          { label: "Verbleibend", value: remaining >= 0 ? fmt(animRemaining) : `-${fmt(animRemaining)}`, color: remaining >= 0 ? "text-primary" : "text-destructive" },
+        ].map((s, i) => (
+          <div key={i} className="bg-card rounded-xl border border-border p-5 hover:shadow-lg transition-all duration-300">
+            <p className="text-sm text-muted-foreground font-body">{s.label}</p>
+            <p className={`text-2xl font-heading font-bold mt-1 ${s.color || "text-foreground"}`}>{s.value}</p>
+            {s.sub && <p className="text-xs text-muted-foreground font-body mt-1">{s.sub}</p>}
           </div>
-        </div>
+        ))}
       </div>
 
-      {/* Progress */}
+      {/* Progress Bar */}
       <div className="bg-card rounded-xl border border-border p-5">
         <div className="flex justify-between text-sm font-body mb-2">
           <span className="text-foreground font-medium">Budget-Fortschritt</span>
           <span className="text-muted-foreground">{fmt(totalActual)} / {fmt(totalPlanned)}</span>
         </div>
         <div className="h-4 bg-secondary rounded-full overflow-hidden">
-          <div className={`h-full rounded-full transition-all duration-500 ${pctUsed > 100 ? "bg-destructive" : pctUsed > 85 ? "bg-gold" : "bg-primary"}`} style={{ width: `${Math.min(pctUsed, 100)}%` }} />
+          <div className={`h-full rounded-full transition-all duration-1000 ${pctUsed > 100 ? "bg-destructive" : pctUsed > 85 ? "bg-gold" : "bg-primary"}`} style={{ width: `${Math.min(pctUsed, 100)}%` }} />
         </div>
       </div>
 
-      {/* Add Form */}
-      {showAdd && (
-        <div className="bg-card rounded-xl border border-border p-6 space-y-4">
-          <h3 className="font-heading text-lg font-semibold text-foreground">Neue Position</h3>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <input value={newItem.category} onChange={e => setNewItem({...newItem, category: e.target.value})} placeholder="Kategorie" className="px-4 py-2.5 rounded-lg border border-border bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/30" />
-            <input type="number" value={newItem.planned || ""} onChange={e => setNewItem({...newItem, planned: Number(e.target.value)})} placeholder="Geplant (€)" className="px-4 py-2.5 rounded-lg border border-border bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/30" />
-            <input type="number" value={newItem.actual || ""} onChange={e => setNewItem({...newItem, actual: Number(e.target.value)})} placeholder="Tatsächlich (€)" className="px-4 py-2.5 rounded-lg border border-border bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/30" />
-            <input value={newItem.vendor} onChange={e => setNewItem({...newItem, vendor: e.target.value})} placeholder="Dienstleister" className="px-4 py-2.5 rounded-lg border border-border bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/30" />
-          </div>
-          <div className="flex gap-2">
-            <Button size="sm" className="font-body" onClick={addItem}>Hinzufügen</Button>
-            <Button variant="outline" size="sm" className="font-body" onClick={() => setShowAdd(false)}>Abbrechen</Button>
-          </div>
+      {/* Charts */}
+      <div className="grid lg:grid-cols-2 gap-6">
+        {/* Pie Chart */}
+        <div className="bg-card rounded-xl border border-border p-6 hover:shadow-lg transition-all duration-300">
+          <h3 className="font-heading text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+            <PieChartIcon size={18} className="text-primary" /> Ausgabenverteilung
+          </h3>
+          <ResponsiveContainer width="100%" height={280}>
+            <PieChart>
+              <Pie data={pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={2} dataKey="value">
+                {pieData.map((_, i) => (
+                  <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip formatter={(v: number) => fmt(v)} contentStyle={{ borderRadius: "12px", border: "1px solid hsl(35, 20%, 90%)", fontSize: "13px" }} />
+              <Legend wrapperStyle={{ fontSize: "12px" }} />
+            </PieChart>
+          </ResponsiveContainer>
         </div>
-      )}
+
+        {/* Bar Chart */}
+        <div className="bg-card rounded-xl border border-border p-6 hover:shadow-lg transition-all duration-300">
+          <h3 className="font-heading text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+            <BarChart3 size={18} className="text-primary" /> Budget vs. Ausgaben
+          </h3>
+          <ResponsiveContainer width="100%" height={280}>
+            <BarChart data={barData} barGap={4}>
+              <XAxis dataKey="name" tick={{ fontSize: 10 }} angle={-30} textAnchor="end" height={60} />
+              <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `€${(v / 1000).toFixed(0)}k`} />
+              <Tooltip formatter={(v: number) => fmt(v)} contentStyle={{ borderRadius: "12px", border: "1px solid hsl(35, 20%, 90%)", fontSize: "13px" }} />
+              <Bar dataKey="Geplant" fill="hsl(35, 20%, 85%)" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="Ausgegeben" fill="hsl(33, 55%, 48%)" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="flex gap-2 flex-wrap">
+        {(["alle", "offen", "bezahlt"] as const).map(m => (
+          <button
+            key={m}
+            onClick={() => setFilterMode(m)}
+            className={`px-4 py-2 rounded-full text-sm font-body transition-colors ${
+              filterMode === m ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:bg-secondary/80"
+            }`}
+          >
+            {m === "alle" ? "Alle" : m === "offen" ? "Offen" : "Bezahlt"}
+          </button>
+        ))}
+      </div>
+
+      {/* Add Dialog */}
+      <Dialog open={showAdd} onOpenChange={setShowAdd}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-heading">Neue Budget-Position</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <label className="block text-sm font-body font-medium text-foreground mb-1.5">Kategorie *</label>
+              <input value={newItem.category} onChange={e => setNewItem({...newItem, category: e.target.value})} placeholder="z.B. Blumen" className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-body font-medium text-foreground mb-1.5">Geplant (€)</label>
+                <input type="number" value={newItem.planned || ""} onChange={e => setNewItem({...newItem, planned: Number(e.target.value)})} className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              </div>
+              <div>
+                <label className="block text-sm font-body font-medium text-foreground mb-1.5">Tatsächlich (€)</label>
+                <input type="number" value={newItem.actual || ""} onChange={e => setNewItem({...newItem, actual: Number(e.target.value)})} className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-body font-medium text-foreground mb-1.5">Dienstleister</label>
+              <input value={newItem.vendor} onChange={e => setNewItem({...newItem, vendor: e.target.value})} placeholder="Name des Anbieters" className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            </div>
+            <div>
+              <label className="block text-sm font-body font-medium text-foreground mb-1.5">Notizen</label>
+              <input value={newItem.notes} onChange={e => setNewItem({...newItem, notes: e.target.value})} placeholder="Optionale Notizen" className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            </div>
+            <div className="flex gap-2 pt-2">
+              <Button className="font-body flex-1" onClick={addItem}>Hinzufügen</Button>
+              <Button variant="outline" className="font-body" onClick={() => setShowAdd(false)}>Abbrechen</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Budget Table */}
       <div className="bg-card rounded-xl border border-border overflow-hidden">
@@ -135,7 +220,7 @@ const DashboardBudget = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {items.map(item => {
+              {filteredItems.map(item => {
                 const diff = item.planned - item.actual;
                 return (
                   <tr key={item.id} className="hover:bg-secondary/20 transition-colors">
@@ -158,12 +243,12 @@ const DashboardBudget = () => {
                       )}
                     </td>
                     <td className="p-4 text-center">
-                      <button onClick={() => togglePaid(item.id)} className={`w-6 h-6 rounded-full border-2 flex items-center justify-center mx-auto transition-colors ${item.paid ? "bg-primary border-primary" : "border-border hover:border-primary/50"}`}>
+                      <button onClick={() => togglePaid(item.id)} className={`w-6 h-6 rounded-full border-2 flex items-center justify-center mx-auto transition-all duration-300 ${item.paid ? "bg-primary border-primary scale-110" : "border-border hover:border-primary/50"}`}>
                         {item.paid && <Check size={12} className="text-primary-foreground" />}
                       </button>
                     </td>
                     <td className="p-4 text-right">
-                      <button onClick={() => removeItem(item.id)} className="p-1.5 rounded hover:bg-secondary text-muted-foreground hover:text-destructive">
+                      <button onClick={() => removeItem(item.id)} className="p-1.5 rounded hover:bg-secondary text-muted-foreground hover:text-destructive transition-colors">
                         <Trash2 size={14} />
                       </button>
                     </td>

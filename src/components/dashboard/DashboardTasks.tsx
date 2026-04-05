@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ListChecks, Plus, Check, Clock, Trash2, Calendar, Tag, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface Task {
   id: number;
@@ -75,7 +76,7 @@ const DashboardTasks = () => {
           </h2>
           <p className="text-sm text-muted-foreground font-body mt-1">{done} von {total} erledigt · {pct}% geschafft</p>
         </div>
-        <Button size="sm" className="font-body" onClick={() => setShowAdd(!showAdd)}>
+        <Button size="sm" className="font-body" onClick={() => setShowAdd(true)}>
           <Plus size={14} className="mr-1.5" /> Aufgabe hinzufügen
         </Button>
       </div>
@@ -87,7 +88,7 @@ const DashboardTasks = () => {
           <span className="text-muted-foreground">{done}/{total}</span>
         </div>
         <div className="h-3 bg-secondary rounded-full overflow-hidden">
-          <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${pct}%` }} />
+          <div className="h-full rounded-full bg-primary transition-all duration-1000" style={{ width: `${pct}%` }} />
         </div>
       </div>
 
@@ -105,25 +106,50 @@ const DashboardTasks = () => {
         </label>
       </div>
 
-      {/* Add Form */}
-      {showAdd && (
-        <div className="bg-card rounded-xl border border-border p-6 space-y-4">
-          <h3 className="font-heading text-lg font-semibold text-foreground">Neue Aufgabe</h3>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <input value={newTask.title} onChange={e => setNewTask({...newTask, title: e.target.value})} placeholder="Aufgabe" className="px-4 py-2.5 rounded-lg border border-border bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/30 sm:col-span-2" />
-            <input value={newTask.dueDate} onChange={e => setNewTask({...newTask, dueDate: e.target.value})} placeholder="Fällig am (z.B. 01.06.2026)" className="px-4 py-2.5 rounded-lg border border-border bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/30" />
-            <select value={newTask.priority} onChange={e => setNewTask({...newTask, priority: e.target.value as any})} className="px-3 py-2.5 rounded-lg border border-border bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/30">
-              <option value="hoch">Hoch</option>
-              <option value="mittel">Mittel</option>
-              <option value="niedrig">Niedrig</option>
-            </select>
+      {/* Add Task Dialog */}
+      <Dialog open={showAdd} onOpenChange={setShowAdd}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-heading">Neue Aufgabe</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <label className="block text-sm font-body font-medium text-foreground mb-1.5">Aufgabe *</label>
+              <input value={newTask.title} onChange={e => setNewTask({...newTask, title: e.target.value})} placeholder="Was muss erledigt werden?" className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            </div>
+            <div>
+              <label className="block text-sm font-body font-medium text-foreground mb-1.5">Fällig am</label>
+              <input value={newTask.dueDate} onChange={e => setNewTask({...newTask, dueDate: e.target.value})} placeholder="z.B. 01.06.2026" className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-body font-medium text-foreground mb-1.5">Kategorie</label>
+                <select value={newTask.category} onChange={e => setNewTask({...newTask, category: e.target.value})} className="w-full px-3 py-2.5 rounded-lg border border-border bg-background text-sm font-body">
+                  {categories.filter(c => c !== "Alle").map(c => <option key={c}>{c}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-body font-medium text-foreground mb-1.5">Priorität</label>
+                <select value={newTask.priority} onChange={e => setNewTask({...newTask, priority: e.target.value as any})} className="w-full px-3 py-2.5 rounded-lg border border-border bg-background text-sm font-body">
+                  <option value="hoch">Hoch</option>
+                  <option value="mittel">Mittel</option>
+                  <option value="niedrig">Niedrig</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-body font-medium text-foreground mb-1.5">Zuständig</label>
+              <select value={newTask.assignee} onChange={e => setNewTask({...newTask, assignee: e.target.value})} className="w-full px-3 py-2.5 rounded-lg border border-border bg-background text-sm font-body">
+                <option>Laura</option><option>Markus</option><option>Beide</option>
+              </select>
+            </div>
+            <div className="flex gap-2 pt-2">
+              <Button className="font-body flex-1" onClick={addTask}>Hinzufügen</Button>
+              <Button variant="outline" className="font-body" onClick={() => setShowAdd(false)}>Abbrechen</Button>
+            </div>
           </div>
-          <div className="flex gap-2">
-            <Button size="sm" className="font-body" onClick={addTask}>Hinzufügen</Button>
-            <Button variant="outline" size="sm" className="font-body" onClick={() => setShowAdd(false)}>Abbrechen</Button>
-          </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
 
       {/* Task List */}
       <div className="bg-card rounded-xl border border-border divide-y divide-border">
@@ -131,14 +157,14 @@ const DashboardTasks = () => {
           <div key={task.id} className="flex items-center gap-4 px-5 py-4 hover:bg-secondary/20 transition-colors group">
             <button
               onClick={() => toggleDone(task.id)}
-              className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
-                task.done ? "bg-primary border-primary" : "border-border hover:border-primary/50"
+              className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all duration-300 ${
+                task.done ? "bg-primary border-primary scale-110" : "border-border hover:border-primary/50"
               }`}
             >
               {task.done && <Check size={12} className="text-primary-foreground" />}
             </button>
             <div className="flex-1 min-w-0">
-              <p className={`text-sm font-body font-medium ${task.done ? "line-through text-muted-foreground" : "text-foreground"}`}>{task.title}</p>
+              <p className={`text-sm font-body font-medium transition-all ${task.done ? "line-through text-muted-foreground" : "text-foreground"}`}>{task.title}</p>
               <div className="flex flex-wrap items-center gap-2 mt-1">
                 <span className="text-xs text-muted-foreground font-body flex items-center gap-1"><Calendar size={10} /> {task.dueDate}</span>
                 <span className="text-xs text-muted-foreground font-body flex items-center gap-1"><Tag size={10} /> {task.category}</span>
@@ -146,7 +172,7 @@ const DashboardTasks = () => {
               </div>
             </div>
             {priorityBadge(task.priority)}
-            <button onClick={() => removeTask(task.id)} className="opacity-0 group-hover:opacity-100 p-1.5 rounded hover:bg-secondary text-muted-foreground hover:text-destructive transition-opacity">
+            <button onClick={() => removeTask(task.id)} className="opacity-0 group-hover:opacity-100 p-1.5 rounded hover:bg-secondary text-muted-foreground hover:text-destructive transition-all">
               <Trash2 size={14} />
             </button>
           </div>
