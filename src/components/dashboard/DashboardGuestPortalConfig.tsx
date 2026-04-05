@@ -1,6 +1,7 @@
-import { useState } from "react";
-import { Monitor, Eye, GripVertical, ToggleLeft, ToggleRight, ArrowUp, ArrowDown, RotateCcw } from "lucide-react";
+import { useState, useRef } from "react";
+import { Monitor, Eye, RotateCcw, Plus, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Link } from "react-router-dom";
 
 interface PortalSection {
@@ -27,20 +28,43 @@ const defaultSections: PortalSection[] = [
 
 const DashboardGuestPortalConfig = () => {
   const [sections, setSections] = useState(defaultSections);
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
+  const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
+  const [showAddSection, setShowAddSection] = useState(false);
+  const [newSection, setNewSection] = useState({ label: "", description: "", emoji: "📌" });
 
   const toggleSection = (id: string) => {
     setSections(sections.map(s => s.id === id ? { ...s, enabled: !s.enabled } : s));
   };
 
-  const moveSection = (id: string, dir: -1 | 1) => {
-    const idx = sections.findIndex(s => s.id === id);
-    if ((dir === -1 && idx === 0) || (dir === 1 && idx === sections.length - 1)) return;
-    const newSections = [...sections];
-    [newSections[idx], newSections[idx + dir]] = [newSections[idx + dir], newSections[idx]];
-    setSections(newSections);
-  };
-
   const resetSections = () => setSections(defaultSections);
+
+  // Drag and drop
+  const handleDragStart = (idx: number) => setDragIdx(idx);
+  const handleDragOver = (e: React.DragEvent, idx: number) => { e.preventDefault(); setDragOverIdx(idx); };
+  const handleDrop = (idx: number) => {
+    if (dragIdx === null) return;
+    const newSections = [...sections];
+    const [moved] = newSections.splice(dragIdx, 1);
+    newSections.splice(idx, 0, moved);
+    setSections(newSections);
+    setDragIdx(null);
+    setDragOverIdx(null);
+  };
+  const handleDragEnd = () => { setDragIdx(null); setDragOverIdx(null); };
+
+  const addSection = () => {
+    if (!newSection.label) return;
+    setSections([...sections, {
+      id: `custom_${Date.now()}`,
+      label: newSection.label,
+      description: newSection.description,
+      enabled: true,
+      emoji: newSection.emoji,
+    }]);
+    setNewSection({ label: "", description: "", emoji: "📌" });
+    setShowAddSection(false);
+  };
 
   return (
     <div className="space-y-6 max-w-3xl">
@@ -59,8 +83,11 @@ const DashboardGuestPortalConfig = () => {
               <Eye size={14} className="mr-1.5" /> Vorschau
             </Button>
           </Link>
+          <Button variant="outline" size="sm" className="font-body" onClick={() => setShowAddSection(true)}>
+            <Plus size={14} className="mr-1.5" /> Sektion
+          </Button>
           <Button variant="outline" size="sm" className="font-body" onClick={resetSections}>
-            <RotateCcw size={14} className="mr-1.5" /> Zurücksetzen
+            <RotateCcw size={14} className="mr-1.5" /> Reset
           </Button>
         </div>
       </div>
@@ -69,9 +96,9 @@ const DashboardGuestPortalConfig = () => {
       <div className="bg-champagne/50 rounded-xl border border-border p-4 flex items-start gap-3">
         <span className="text-lg">💡</span>
         <div>
-          <p className="text-sm font-body font-medium text-foreground">So funktioniert die Gästeseite</p>
+          <p className="text-sm font-body font-medium text-foreground">Drag & Drop</p>
           <p className="text-xs text-muted-foreground font-body mt-1">
-            Aktiviert oder deaktiviert Sektionen und ordnet sie per Pfeil-Buttons an. Eure Gäste sehen die Seite genau in der Reihenfolge, die ihr hier festlegt.
+            Zieht die Sektionen per Drag & Drop in die gewünschte Reihenfolge. Schaltet Sektionen ein oder aus.
           </p>
         </div>
       </div>
@@ -83,7 +110,19 @@ const DashboardGuestPortalConfig = () => {
         </div>
         <div className="divide-y divide-border">
           {sections.map((section, idx) => (
-            <div key={section.id} className={`flex items-center gap-4 px-5 py-4 transition-colors ${section.enabled ? "" : "opacity-50"}`}>
+            <div
+              key={section.id}
+              draggable
+              onDragStart={() => handleDragStart(idx)}
+              onDragOver={(e) => handleDragOver(e, idx)}
+              onDrop={() => handleDrop(idx)}
+              onDragEnd={handleDragEnd}
+              className={`flex items-center gap-4 px-5 py-4 transition-all duration-200 cursor-grab active:cursor-grabbing ${
+                section.enabled ? "" : "opacity-50"
+              } ${dragOverIdx === idx && dragIdx !== idx ? "bg-primary/5 border-l-4 border-l-primary" : ""} ${
+                dragIdx === idx ? "opacity-30" : ""
+              } hover:bg-secondary/20`}
+            >
               <GripVertical size={14} className="text-muted-foreground flex-shrink-0" />
               <span className="text-xl flex-shrink-0">{section.emoji}</span>
 
@@ -98,19 +137,37 @@ const DashboardGuestPortalConfig = () => {
                 <p className="text-sm font-body font-medium text-foreground">{section.label}</p>
                 <p className="text-xs text-muted-foreground font-body">{section.description}</p>
               </div>
-
-              <div className="flex gap-1">
-                <button onClick={() => moveSection(section.id, -1)} disabled={idx === 0} className="p-1.5 rounded hover:bg-secondary text-muted-foreground disabled:opacity-30">
-                  <ArrowUp size={14} />
-                </button>
-                <button onClick={() => moveSection(section.id, 1)} disabled={idx === sections.length - 1} className="p-1.5 rounded hover:bg-secondary text-muted-foreground disabled:opacity-30">
-                  <ArrowDown size={14} />
-                </button>
-              </div>
             </div>
           ))}
         </div>
       </div>
+
+      {/* Add Section Dialog */}
+      <Dialog open={showAddSection} onOpenChange={setShowAddSection}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-heading">Neue Sektion</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <label className="block text-sm font-body font-medium text-foreground mb-1.5">Name</label>
+              <input value={newSection.label} onChange={e => setNewSection({...newSection, label: e.target.value})} placeholder="z.B. Dresscode" className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            </div>
+            <div>
+              <label className="block text-sm font-body font-medium text-foreground mb-1.5">Beschreibung</label>
+              <input value={newSection.description} onChange={e => setNewSection({...newSection, description: e.target.value})} placeholder="Kurze Beschreibung" className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            </div>
+            <div>
+              <label className="block text-sm font-body font-medium text-foreground mb-1.5">Emoji</label>
+              <input value={newSection.emoji} onChange={e => setNewSection({...newSection, emoji: e.target.value})} className="w-20 px-4 py-2.5 rounded-lg border border-border bg-background text-sm font-body focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            </div>
+            <div className="flex gap-2 pt-2">
+              <Button className="font-body flex-1" onClick={addSection}>Hinzufügen</Button>
+              <Button variant="outline" className="font-body" onClick={() => setShowAddSection(false)}>Abbrechen</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
