@@ -1,57 +1,37 @@
 
-## Plan: Dashboard Premium-Upgrade
 
-### 1. Animations & Micro-Interactions
-- Add `useAnimatedNumber` hook for counting animations (0→124)
-- Add fade-in animations to all widget cards and sections
-- Add hover effects to cards (scale, shadow, border glow)
-- CSS transitions throughout
+## Einstellungen: Tabs + Theme Studio
 
-### 2. Dark Mode
-- Add dark mode toggle to DashboardHeader and DashboardSettings
-- Use `next-themes` ThemeProvider (already installed)
-- Toggle in header (moon/sun icon)
+### Aktueller Zustand
+Die Einstellungen zeigen alles untereinander in einer langen scrollbaren Liste (Event-Details, Design & Theme, Gästeportal, Benachrichtigungen).
 
-### 3. Overview Enhancements
-- Grid layout option (iPhone-style tiles, 1/2/3 columns based on widget size)
-- Drag-and-drop via HTML5 drag API
-- Budget traffic-light banner (>90% yellow, >100% red)
+### Plan
 
-### 4. Pop-up Dialogs (replace inline forms)
-- DashboardGuests: Add guest dialog
-- DashboardTasks: Add task dialog  
-- DashboardTimeline: Add event dialog
-- DashboardBudget: Add position dialog
+**1. Tab-basierte Navigation in den Einstellungen**
 
-### 5. Budget Enhancement
-- Pie chart (recharts - already installed)
-- Bar chart (budget vs actual per category)
-- Category filters (all/open/paid)
-- Position add via popup
+Die Einstellungen werden mit `shadcn Tabs` in separate Reiter aufgeteilt:
 
-### 6. Food/Menu Management
-- Add edit/delete buttons to menu items in Menükarte tab
-- Add "Gericht hinzufügen" button with dialog
+| Tab | Icon | Inhalt |
+|-----|------|--------|
+| **Allgemein** | Calendar | Event-Name, Datum, Ort, RSVP-Frist |
+| **Theme Studio** | Palette | Neuer umfangreicher Design-Editor (siehe unten) |
+| **Gästeportal** | Globe | Zugangscode, Begrüßungstext, Portal öffentlich |
+| **Benachrichtigungen** | Bell | Alle Notification-Toggles |
 
-### 7. Wishlist Enhancement  
-- Custom categories (add/manage)
-- PayPal link field in settings area
+**2. Theme Studio (neuer Tab)**
 
-### 8. Honeymoon World Map Fix
-- Replace minimal SVG with a proper world map SVG with country outlines
+Ein vollwertiger Design-Editor der **global** wirkt (CSS-Variablen auf `:root` ändern):
 
-### 9. Settings Redesign
-- Design & Theme section with dark mode, accent color, font preview
-- Better organized sections
+- **Dark/Light Mode Toggle** mit Live-Umschaltung
+- **Akzentfarbe** — Farbpalette + Custom Color Picker → setzt `--primary` CSS-Variable global via `document.documentElement.style.setProperty`
+- **Schriftart-Auswahl** — Font-Paare (Playfair+DM Sans, Cormorant+Lato, Montserrat+Open Sans) → setzt `--font-heading` und `--font-body` CSS-Variablen global
+- **Border-Radius** — Slider (0px bis 20px) → setzt `--radius` global
+- **Live-Vorschau** — Ein Preview-Panel das eine Mini-Karte mit Überschrift, Text und Button zeigt, die sofort auf alle Änderungen reagiert
+- Einstellungen werden in `localStorage` persistiert und beim Laden wiederhergestellt via erweitertem `useTheme` Hook
 
-### 10. Guest Portal Config
-- Drag-and-drop reordering instead of arrows
-- More interactive
+**3. Technische Umsetzung**
 
-### 11. Konfetti on RSVP
-- Add canvas-confetti for RSVP demo page acceptance
+- `DashboardSettings.tsx` komplett umbauen: Wrapper mit `<Tabs>` Komponente, jeder Tab-Inhalt als eigener Abschnitt
+- `useTheme.ts` erweitern: neben dark/light auch `primaryColor`, `fontPair`, `borderRadius` speichern und als CSS-Variablen auf `:root` setzen
+- Bestehende Inhalte bleiben identisch, werden nur in die richtigen Tabs verschoben
 
-### 12. Additional innovative features
-- Countdown widget in overview
-- Quick actions bar
-- Notification center concept
