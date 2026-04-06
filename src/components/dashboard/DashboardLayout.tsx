@@ -69,13 +69,33 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       )}
 
       <div className="flex-1 flex flex-col min-w-0 h-screen">
-        {/* Minimal mobile header */}
-        <div className="md:hidden h-14 flex items-center px-4 border-b border-border bg-card flex-shrink-0">
-          <button onClick={() => setMobileOpen(true)} className="p-2 text-foreground">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+        {/* Mobile header */}
+        <div className="md:hidden h-12 flex items-center justify-between px-3 border-b border-border bg-card flex-shrink-0">
+          <button onClick={() => setMobileOpen(true)} className="p-1.5 text-foreground">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+          </button>
+          <span className="font-heading text-sm font-bold text-gradient-gold">Evoria</span>
+          <div className="w-7 h-7 rounded-full bg-champagne flex items-center justify-center text-[10px] font-heading font-bold text-primary">L&M</div>
+        </div>
+
+        {/* Bottom mobile nav */}
+        <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-card border-t border-border flex justify-around py-1.5 px-1">
+          {mobileNavItems.slice(0, 5).map(item => {
+            const active = location.pathname === item.path;
+            return (
+              <Link key={item.path} to={item.path} className={`flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg transition-colors ${active ? "text-primary" : "text-muted-foreground"}`}>
+                <item.icon size={18} />
+                <span className="text-[9px] font-body font-medium">{item.label}</span>
+              </Link>
+            );
+          })}
+          <button onClick={() => setMobileOpen(true)} className="flex flex-col items-center gap-0.5 px-2 py-1 text-muted-foreground">
+            <Settings size={18} />
+            <span className="text-[9px] font-body font-medium">Mehr</span>
           </button>
         </div>
-        <main className="flex-1 p-4 lg:p-6 overflow-y-auto">
+
+        <main className="flex-1 p-3 sm:p-4 lg:p-6 overflow-y-auto pb-20 md:pb-6">
           {children}
         </main>
       </div>
